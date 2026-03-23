@@ -1,5 +1,6 @@
 from langchain_core.messages import HumanMessage
 from agent import build_agent
+from memory import clear_history, load_history, save_history
 from token_tracker import TokenTracker
 
 
@@ -7,14 +8,24 @@ def main():
     agent = build_agent()
     tracker = TokenTracker(model='llama-3.1-8b-instant')
 
-    print('Agent ready! Type quit to exit.')
-    history = []
+    print('Agent ready! Type clear to reset memory or quit to exit.')
+    history = load_history()
+    if history:
+        print(f'Resumed session with {len(history)} previous messages.')
 
     while True:
         user_input = input('\nYou: ').strip()
 
+        if user_input.lower() == 'clear':
+            clear_history()
+            history = []
+            print('In-memory chat history reset for this session.')
+            continue
+
         if user_input.lower() in ['quit', 'exit', 'q']:
+            save_history(history)
             print(tracker.summary())
+            print('Goodbye!')
             break
 
         if not user_input:
