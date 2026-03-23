@@ -1,81 +1,57 @@
-# LangChain + LangGraph Research and PDF Agent
+# LangChain + LangGraph Research Agent
 
-A lightweight, terminal-based AI assistant built with LangChain, LangGraph, and Groq. This project combines a tool-using chat agent with two practical capabilities:
+Build a practical AI assistant that can both search the web and read PDFs, right from your terminal.
 
-- Web search using DuckDuckGo for current facts and public information
-- PDF reading for document-based question answering and summarization
+This project combines LangChain, LangGraph, and Groq to create a tool-using chat agent that keeps conversation context, decides when to call tools, and returns clear long-form responses. It also includes a ready-to-use chess reference file, `sample.pdf`, so you can test document Q&A immediately.
 
-The agent keeps conversation history, decides when to call tools, and returns polished long-form answers. In this repository, `sample.pdf` is included as a chess book so you can test document Q&A and summarization workflows immediately.
+> [!TIP]
+> If you want a minimal but real example of tool-calling agents with graph-based routing, this repo is a great starting point.
 
-## Features
+## What You Get
 
-- Tool-augmented chat agent built on LangGraph state transitions
-- Groq-hosted LLM integration (`llama-3.1-8b-instant`)
-- Automatic tool routing with loop-back execution
-- Conversation memory across turns in a single session
-- Built-in PDF text extraction with page markers
-- Detailed response style enforced through system prompt rules
-- Minimum response-length policy (100+ words in final answers)
+- Web search via DuckDuckGo for fresh facts and current information
+- PDF reading and text extraction for document-based Q&A
+- LangGraph workflow with automatic tool routing and loop-back execution
+- Session-level conversation history in the CLI
+- Structured response behavior via system prompt rules
+- Minimum final response length policy (100+ words)
 
-## Project Structure
-
-- `main.py`: CLI entry point with chat loop and message history
-- `agent.py`: Agent construction, LLM setup, system prompt, and graph wiring
-- `tools.py`: Tool implementations (`web_search`, `read_pdf`)
-- `requirements.txt`: Python dependency list
-- `sample.pdf`: Chess book used for PDF testing and demo queries
-
-## How It Works
-
-The app uses a LangGraph workflow with two nodes:
-
-1. `agent` node:
-   - Builds a message list with a system prompt + chat history
-   - Invokes the LLM with bound tools
-2. `tools` node:
-   - Executes the selected tool call
-   - Returns tool output back to the graph
-
-Flow summary:
-
-- Start -> agent
-- If the model asks for tools -> tools -> agent
-- If no tool is needed -> end
-
-This allows the model to think, call one of the tools when needed, and then generate the final response using retrieved information.
-
-## Requirements
+## Tech Stack
 
 - Python 3.10+
-- A Groq API key
-- Internet access for web search
+- LangChain
+- LangGraph
+- Groq API (`llama-3.1-8b-instant`)
+- DuckDuckGo Search (`duckduckgo-search`)
+- PyMuPDF (`pymupdf`)
+- Python Dotenv
 
-## Installation
+## Quick Start
 
-### 1. Clone the repository
+### 1. Clone
 
 ```bash
 git clone <your-repo-url>
 cd Langchain_Agent
 ```
 
-### 2. Create and activate a virtual environment
+### 2. Create a virtual environment
 
-#### Windows (PowerShell)
+Windows (PowerShell):
 
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-#### Windows (Command Prompt)
+Windows (Command Prompt):
 
 ```bat
 python -m venv venv
 venv\Scripts\activate.bat
 ```
 
-#### macOS/Linux
+macOS/Linux:
 
 ```bash
 python -m venv venv
@@ -88,7 +64,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Environment Variables
+### 4. Configure environment
 
 Create a `.env` file in the project root:
 
@@ -96,113 +72,99 @@ Create a `.env` file in the project root:
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-The application loads environment variables with `python-dotenv`.
-
-## Running the Agent
+### 5. Run
 
 ```bash
 python main.py
 ```
 
-You should see:
+Expected startup message:
 
 ```text
 Agent ready! Type quit to exit.
 ```
 
-Type your question and press Enter. Exit anytime using:
+Exit commands: `quit`, `exit`, `q`
 
-- `quit`
-- `exit`
-- `q`
+## Included Demo File: Chess Book PDF
 
-## Using the Chess PDF (`sample.pdf`)
+The repository includes `sample.pdf` (a chess book) so you can test document-aware prompts out of the box.
 
-This repository includes `sample.pdf`, a chess book, so you can immediately test document-aware interactions.
+Try prompts like:
 
-### Example prompts
+- "Summarize the key ideas in sample.pdf."
+- "What opening principles are covered in the chess book?"
+- "Give me five practical tactics from sample.pdf with simple examples."
+- "Create a beginner-friendly chess study plan based on sample.pdf."
 
-- "Summarize the main concepts explained in sample.pdf."
-- "What does the book say about opening principles?"
-- "List 5 practical tactics from sample.pdf with simple examples."
-- "Create a beginner study plan from the chess book in sample.pdf."
+PDF tool behavior:
 
-### Notes on PDF reading behavior
+- Extracts text page by page
+- Adds page separators (`--- Page N ---`)
+- Truncates very large output for stability
+- Returns clear errors for missing files or non-extractable text
 
-- The `read_pdf` tool extracts text page-by-page
-- Output includes page separators (`--- Page N ---`)
-- Very large extracted text is truncated to keep responses manageable
-- If text is not extractable, the tool reports that clearly
+## How It Works
 
-## Web Search Behavior
+The app is built as a small LangGraph workflow with two nodes:
 
-The `web_search` tool uses DuckDuckGo and returns up to 5 results with:
+1. `agent`
+   - Builds messages from system prompt + chat history
+   - Invokes the LLM with bound tools
+2. `tools`
+   - Executes selected tool calls
+   - Passes tool output back to the agent
 
-- Title
-- URL
-- Short summary
+Flow:
 
-Use cases:
+- Start -> `agent`
+- Tool needed -> `tools` -> `agent`
+- No tool needed -> End
 
-- Current events
-- Fresh facts not likely in model training data
-- Lightweight verification and references
+This keeps tool use controlled and allows the model to produce final answers grounded in retrieved results.
 
-## Design Choices
+## Project Layout
 
-- `temperature=0` for deterministic and stable answers
-- `max_tokens=1024` to support long, complete responses
-- Explicit tool-use constraints in the system prompt to reduce repeated calls
-- Message history retained in memory during runtime for context continuity
+- `main.py` - CLI loop and message history
+- `agent.py` - LLM setup, system prompt, graph wiring
+- `tools.py` - `web_search` and `read_pdf` tool implementations
+- `requirements.txt` - dependencies
+- `sample.pdf` - chess book for PDF Q&A demos
 
 ## Troubleshooting
 
-### Groq authentication error
+### Groq key/auth issues
 
-- Confirm `.env` exists in the project root
-- Confirm `GROQ_API_KEY` is valid and active
-- Restart the terminal after updating environment variables
+- Confirm `.env` exists in the root
+- Verify `GROQ_API_KEY` is valid
+- Restart terminal session after edits
 
-### No web results
+### Web search returns nothing
 
-- Check internet connection
-- Retry with a more specific query
-- Verify DuckDuckGo access from your network
+- Check internet connectivity
+- Try a more specific query
+- Confirm DuckDuckGo is reachable from your network
 
-### PDF not found
+### PDF errors or weak extraction
 
-- Use the correct path and filename
-- Keep `sample.pdf` in the project root or provide absolute path
+- Verify file path/filename
+- Keep `sample.pdf` in project root or pass absolute path
+- For image-only PDFs, run OCR first
 
-### Empty or weak PDF output
+## Security Notes
 
-- Some PDFs are image-only and have little extractable text
-- Run OCR externally if needed, then re-test with a text-searchable PDF
+- Never commit real API keys
+- Keep secrets in `.env` and ensure `.env` is ignored by Git
+- Treat tool output as helpful context, not guaranteed truth
 
-## Security and Usage Notes
+## Roadmap Ideas
 
-- Do not commit real secrets to source control
-- Keep API keys in `.env` and add `.env` to `.gitignore`
-- Review model outputs before using them in critical decisions
-- Tool outputs may include inaccuracies and should be verified when important
-
-## Suggested Next Improvements
-
-- Add streaming token output for better chat UX
-- Add page-range support for PDF tool calls
-- Add citation formatting with source links and page references
-- Add tests for tool functions and graph behavior
-- Add a small web UI (Streamlit/FastAPI + frontend)
-
-## Tech Stack
-
-- LangChain
-- LangGraph
-- Groq API (`llama-3.1-8b-instant`)
-- DuckDuckGo Search (`duckduckgo-search`)
-- PyMuPDF (`pymupdf`)
-- Python Dotenv
+- Streaming token output in CLI
+- Page-range support for PDF reading
+- Source citations with URL/page references
+- Tests for tools and graph behavior
+- Optional web UI (Streamlit or FastAPI frontend)
 
 ## License
 
-Add your preferred license in this section (for example, MIT) before publishing.
+Add your preferred license (for example, MIT) before publishing.
