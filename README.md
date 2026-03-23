@@ -1,34 +1,45 @@
-# LangChain + LangGraph Research Agent
+# 🤖 LangChain + LangGraph Research Agent
 
-Build a practical AI assistant that can both search the web and read PDFs, right from your terminal.
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![LangChain](https://img.shields.io/badge/LangChain-Framework-1C3C3C?style=for-the-badge&logo=chainlink&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-Workflow-FF6B6B?style=for-the-badge)
+![Groq](https://img.shields.io/badge/Groq-LLM_API-F55036?style=for-the-badge&logo=groq&logoColor=white)
+![DuckDuckGo](https://img.shields.io/badge/DuckDuckGo-Web_Search-DE5833?style=for-the-badge&logo=duckduckgo&logoColor=white)
+![PyMuPDF](https://img.shields.io/badge/PyMuPDF-PDF_Parsing-brightgreen?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-This project combines LangChain, LangGraph, and Groq to create a tool-using chat agent that keeps conversation context, decides when to call tools, and returns clear long-form responses. It also includes a ready-to-use chess reference file, `sample.pdf`, so you can test document Q&A immediately.
+> A practical AI assistant that searches the web and reads PDFs — right from your terminal.
 
-> [!TIP]
-> If you want a minimal but real example of tool-calling agents with graph-based routing, this repo is a great starting point.
+This project combines **LangChain**, **LangGraph**, and **Groq** to build a tool-using conversational agent that maintains session history, intelligently routes tool calls, and delivers clear, long-form responses. A ready-to-use chess reference (`sample.pdf`) is included so you can test document Q&A out of the box.
 
-## What You Get
+---
 
-- Web search via DuckDuckGo for fresh facts and current information
-- PDF reading and text extraction for document-based Q&A
-- LangGraph workflow with automatic tool routing and loop-back execution
-- Session-level conversation history in the CLI
-- Structured response behavior via system prompt rules
-- Minimum final response length policy (100+ words)
+## ✨ Features
 
-## Tech Stack
+- 🔍 **Web search** via DuckDuckGo for fresh, real-time information
+- 📄 **PDF reading** with page-by-page text extraction for document Q&A
+- 🔄 **LangGraph workflow** with automatic tool routing and loop-back execution
+- 🗂️ **Session-level conversation history** maintained throughout the CLI session
+- 📏 **Minimum response length** enforced at 100+ words via system prompt rules
 
-- Python 3.10+
-- LangChain
-- LangGraph
-- Groq API (`llama-3.1-8b-instant`)
-- DuckDuckGo Search (`duckduckgo-search`)
-- PyMuPDF (`pymupdf`)
-- Python Dotenv
+---
 
-## Quick Start
+## 🧰 Tech Stack
 
-### 1. Clone
+| Layer | Technology |
+|---|---|
+| Language | Python 3.10+ |
+| Agent Framework | LangChain + LangGraph |
+| LLM Provider | Groq API (`llama-3.1-8b-instant`) |
+| Web Search | DuckDuckGo (`duckduckgo-search`) |
+| PDF Parsing | PyMuPDF (`pymupdf`) |
+| Config | Python Dotenv |
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone the repository
 
 ```bash
 git clone <your-repo-url>
@@ -37,22 +48,19 @@ cd Langchain_Agent
 
 ### 2. Create a virtual environment
 
-Windows (PowerShell):
-
+**Windows (PowerShell)**
 ```powershell
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-Windows (Command Prompt):
-
+**Windows (Command Prompt)**
 ```bat
 python -m venv venv
 venv\Scripts\activate.bat
 ```
 
-macOS/Linux:
-
+**macOS / Linux**
 ```bash
 python -m venv venv
 source venv/bin/activate
@@ -72,99 +80,109 @@ Create a `.env` file in the project root:
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-### 5. Run
+### 5. Run the agent
 
 ```bash
 python main.py
 ```
 
-Expected startup message:
-
-```text
+You should see:
+```
 Agent ready! Type quit to exit.
 ```
 
-Exit commands: `quit`, `exit`, `q`
+> To exit, type `quit`, `exit`, or `q`.
 
-## Included Demo File: Chess Book PDF
+---
 
-The repository includes `sample.pdf` (a chess book) so you can test document-aware prompts out of the box.
+## 📄 Demo: Chess Book PDF
 
-Try prompts like:
+The repo includes `sample.pdf` (a chess book) for immediate document-aware testing.
 
-- "Summarize the key ideas in sample.pdf."
-- "What opening principles are covered in the chess book?"
-- "Give me five practical tactics from sample.pdf with simple examples."
-- "Create a beginner-friendly chess study plan based on sample.pdf."
+**Try these prompts:**
 
-PDF tool behavior:
+- `"Summarize the key ideas in sample.pdf."`
+- `"What opening principles are covered in the chess book?"`
+- `"Give me five practical tactics from sample.pdf with simple examples."`
+- `"Create a beginner-friendly chess study plan based on sample.pdf."`
 
+**How PDF extraction works:**
 - Extracts text page by page
-- Adds page separators (`--- Page N ---`)
-- Truncates very large output for stability
-- Returns clear errors for missing files or non-extractable text
+- Inserts `--- Page N ---` separators between pages
+- Truncates very large outputs for stability
+- Returns clear error messages for missing or non-extractable files
 
-## How It Works
+---
 
-The app is built as a small LangGraph workflow with two nodes:
+## 🏗️ How It Works
 
-1. `agent`
-   - Builds messages from system prompt + chat history
-   - Invokes the LLM with bound tools
-2. `tools`
-   - Executes selected tool calls
-   - Passes tool output back to the agent
+The agent is built as a compact **LangGraph** state machine with two nodes:
 
-Flow:
+| Node | Responsibility |
+|---|---|
+| `agent` | Builds messages from system prompt + history, invokes LLM with tools |
+| `tools` | Executes selected tool calls and returns results to the agent |
 
-- Start -> `agent`
-- Tool needed -> `tools` -> `agent`
-- No tool needed -> End
+**Execution flow:**
 
-This keeps tool use controlled and allows the model to produce final answers grounded in retrieved results.
+```
+Start → agent → (tool needed?) → tools → agent → ... → End
+```
 
-## Project Layout
+This keeps tool use controlled and allows the model to ground final answers in retrieved content.
 
-- `main.py` - CLI loop and message history
-- `agent.py` - LLM setup, system prompt, graph wiring
-- `tools.py` - `web_search` and `read_pdf` tool implementations
-- `requirements.txt` - dependencies
-- `sample.pdf` - chess book for PDF Q&A demos
+---
 
-## Troubleshooting
+## 📁 Project Layout
 
-### Groq key/auth issues
+```
+Langchain_Agent/
+├── main.py          # CLI loop and message history
+├── agent.py         # LLM setup, system prompt, graph wiring
+├── tools.py         # web_search and read_pdf tool implementations
+├── requirements.txt # Python dependencies
+└── sample.pdf       # Chess book for PDF Q&A demos
+```
 
-- Confirm `.env` exists in the root
-- Verify `GROQ_API_KEY` is valid
-- Restart terminal session after edits
+---
 
-### Web search returns nothing
+## 🛠️ Troubleshooting
 
-- Check internet connectivity
-- Try a more specific query
-- Confirm DuckDuckGo is reachable from your network
+**Groq key / auth issues**
+- Confirm `.env` exists in the project root
+- Verify `GROQ_API_KEY` is valid at [console.groq.com](https://console.groq.com)
+- Restart your terminal after editing `.env`
 
-### PDF errors or weak extraction
+**Web search returns no results**
+- Check your internet connection
+- Try a more specific or rephrased query
+- Verify DuckDuckGo is accessible from your network
 
-- Verify file path/filename
-- Keep `sample.pdf` in project root or pass absolute path
-- For image-only PDFs, run OCR first
+**PDF errors or weak text extraction**
+- Verify the file path and filename are correct
+- Keep `sample.pdf` in the project root, or provide an absolute path
+- For image-only / scanned PDFs, run OCR preprocessing first
 
-## Security Notes
+---
 
-- Never commit real API keys
-- Keep secrets in `.env` and ensure `.env` is ignored by Git
-- Treat tool output as helpful context, not guaranteed truth
+## 🔐 Security Notes
 
-## Roadmap Ideas
+- **Never commit real API keys** to version control
+- Store all secrets in `.env` and ensure it is listed in `.gitignore`
+- Treat tool output as helpful context — not guaranteed truth
 
-- Streaming token output in CLI
-- Page-range support for PDF reading
-- Source citations with URL/page references
-- Tests for tools and graph behavior
-- Optional web UI (Streamlit or FastAPI frontend)
+---
 
-## License
+## 🗺️ Roadmap
 
-Add your preferred license (for example, MIT) before publishing.
+- [ ] Streaming token output in the CLI
+- [ ] Page-range support for selective PDF reading
+- [ ] Source citations with URL and page references
+- [ ] Unit tests for tools and graph behavior
+- [ ] Optional web UI (Streamlit or FastAPI frontend)
+
+---
+
+## 📜 License
+
+Add your preferred license (e.g. MIT) before publishing.
