@@ -19,7 +19,9 @@ This project combines **LangChain**, **LangGraph**, and **Groq** to build a tool
 - 🔍 **Web search** via DuckDuckGo for fresh, real-time information
 - 📄 **PDF reading** with page-by-page text extraction for document Q&A
 - 🔄 **LangGraph workflow** with automatic tool routing and loop-back execution
-- 🗂️ **Session-level conversation history** maintained throughout the CLI session
+- 🧠 **Persistent conversation memory** saved to disk and restored on restart
+- 📡 **Live decision tracing** for LLM calls, tool calls, and errors in terminal logs
+- 💰 **Token and cost tracking** with per-session usage totals and estimated API spend
 - 📏 **Minimum response length** enforced at 100+ words via system prompt rules
 
 ---
@@ -88,10 +90,16 @@ python main.py
 
 You should see:
 ```
-Agent ready! Type quit to exit.
+Agent ready! Type clear to reset memory or quit to exit.
 ```
 
-> To exit, type `quit`, `exit`, or `q`.
+Command reference:
+- `quit` / `exit` / `q`: saves conversation history, prints token summary, and exits
+- `clear`: clears persisted chat history and resets current in-memory history
+
+On exit, a session summary is printed with total LLM calls, input/output tokens, and estimated USD cost.
+
+Conversation memory is persisted in `chat_history.json` at the project root.
 
 ---
 
@@ -137,12 +145,31 @@ This keeps tool use controlled and allows the model to ground final answers in r
 
 ```
 Langchain_Agent/
-├── main.py          # CLI loop and message history
+├── main.py          # CLI loop, persistence flow, and token summary output
 ├── agent.py         # LLM setup, system prompt, graph wiring
+├── logger.py        # Live callback logs for LLM/tool activity
+├── token_tracker.py # Token accounting and cost estimation
+├── memory.py        # Save/load/clear persistent chat history
 ├── tools.py         # web_search and read_pdf tool implementations
 ├── requirements.txt # Python dependencies
+├── chat_history.json# Auto-created persistent conversation store
 └── sample.pdf       # Chess book for PDF Q&A demos
 ```
+
+---
+
+## 📊 Observability and Cost Tracking
+
+This project now includes runtime transparency and usage accounting:
+
+- **Live trace logs** come from `AgentLogger` and include:
+	- LLM call start/end
+	- Tool start/input/end
+	- Chain-level errors
+- **Token tracking** records `input_tokens` and `output_tokens` from `usage_metadata`.
+- **Cost estimation** uses model pricing defined in `token_tracker.py`.
+
+> Pricing values are examples and can change over time. Verify current rates in the Groq pricing console.
 
 ---
 
@@ -157,6 +184,11 @@ Langchain_Agent/
 - Check your internet connection
 - Try a more specific or rephrased query
 - Verify DuckDuckGo is accessible from your network
+
+**Memory did not resume as expected**
+- Check whether `chat_history.json` exists in the project root
+- Confirm you exited with `quit`, `exit`, or `q` so history was saved
+- If needed, delete `chat_history.json` and start a fresh session
 
 **PDF errors or weak text extraction**
 - Verify the file path and filename are correct
