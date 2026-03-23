@@ -5,6 +5,7 @@ from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.prebuilt import ToolNode, tools_condition
 from tools import web_search, read_pdf
+from logger import AgentLogger
 
 load_dotenv()
 
@@ -12,7 +13,8 @@ def build_agent():
     llm = ChatGroq(
         model='llama-3.1-8b-instant',
         temperature=0,
-        max_tokens=1024
+        max_tokens=1024,
+        callbacks=[AgentLogger()]
     )
 
     tools = [web_search, read_pdf]
