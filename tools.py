@@ -1,6 +1,8 @@
+import os
 import fitz
 from langchain_core.tools import tool
 from ddgs import DDGS
+from tavily import TavilyClient
 
 
 @tool
@@ -14,6 +16,25 @@ def web_search(query: str) -> str:
         for r in results:
             formatted.append(
                 f"Title: {r['title']}\nURL: {r['href']}\nSummary:\n{r['body']}"
+            )
+        return "\n---\n".join(formatted)
+    except Exception as e:
+        return f"Search failed: {str(e)}"
+
+
+@tool
+def web_search_tavily(query: str) -> str:
+    """Search the web using Tavily. Preferred for research-oriented queries needing high-relevance, scored results."""
+    try:
+        client = TavilyClient()
+        response = client.search(query=query, max_results=5, search_depth="basic")
+        results = response.get("results", [])
+        if not results:
+            return "No results found."
+        formatted = []
+        for r in results:
+            formatted.append(
+                f"Title: {r['title']}\nURL: {r['url']}\nSummary:\n{r['content']}"
             )
         return "\n---\n".join(formatted)
     except Exception as e:

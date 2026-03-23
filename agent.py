@@ -4,7 +4,7 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.prebuilt import ToolNode, tools_condition
-from tools import web_search, read_pdf
+from tools import web_search, web_search_tavily, read_pdf
 from logger import AgentLogger
 
 load_dotenv()
@@ -17,7 +17,7 @@ def build_agent():
         callbacks=[AgentLogger()]
     )
 
-    tools = [web_search, read_pdf]
+    tools = [web_search, web_search_tavily, read_pdf]
     llm_with_tools = llm.bind_tools(tools)
 
     def agent_node(state: MessagesState):
@@ -28,7 +28,9 @@ def build_agent():
                 "Use clear sections, concise headings, and readable formatting where appropriate.\n"
                 "Every final answer MUST be at least 100 words, even for simple questions.\n"
                 "If the user asks for a short answer, still provide at least 100 words while staying relevant.\n"
-                "Use web_search ONLY when necessary.\n"
+                "Use web_search (DuckDuckGo) for quick factual lookups or when no API key is available.\n"
+                "Use web_search_tavily for research-oriented queries needing high-relevance results.\n"
+                "Use a search tool ONLY when necessary.\n"
                 "When using a tool, call it EXACTLY once with a simple query.\n"
                 "Do not repeat tool calls.\n"
                 "After receiving tool results, give a final answer.\n"
