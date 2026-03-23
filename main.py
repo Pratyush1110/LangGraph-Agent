@@ -1,9 +1,11 @@
 from langchain_core.messages import HumanMessage
 from agent import build_agent
+from token_tracker import TokenTracker
 
 
 def main():
     agent = build_agent()
+    tracker = TokenTracker(model='llama-3.1-8b-instant')
 
     print('Agent ready! Type quit to exit.')
     history = []
@@ -12,6 +14,7 @@ def main():
         user_input = input('\nYou: ').strip()
 
         if user_input.lower() in ['quit', 'exit', 'q']:
+            print(tracker.summary())
             break
 
         if not user_input:
@@ -25,6 +28,10 @@ def main():
                 config={'recursion_limit': 30}
             )
             final = result['messages'][-1]
+
+            if hasattr(final, 'usage_metadata') and final.usage_metadata:
+                tracker.record(final.usage_metadata)
+
             print(f'\nAgent: {final.content}')
             history.append(final)
 
